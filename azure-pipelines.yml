@@ -102,12 +102,10 @@ steps:
     contents: '$(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish\**'
     targetFolder: '$(Build.StagingDirectory)\docs\click-once'
 
-- script: git add --all;
-  displayName: '[GIT] Add new files'
-  workingDirectory: $(Build.StagingDirectory)
-
-- script: git commit -m"Pipelines-Bot: publish VSTO Add-in version $(Build.BuildNumber)";
-  displayName: '[GIT] Commit'
+- script: |
+    git add --all;
+    git commit -m"Pipelines-Bot: publish VSTO Add-in version [$(Build.BuildNumber)]";
+  displayName: '[GIT] Commit new files'
   workingDirectory: $(Build.StagingDirectory)  
 
 - script: git push origin master;  
