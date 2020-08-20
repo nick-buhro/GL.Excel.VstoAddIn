@@ -28,21 +28,21 @@
     <RootNamespace>SpreadsheetLedger.ExcelAddIn</RootNamespace>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <DefineConstants>VSTO40</DefineConstants>
-    <IsWebBootstrapper>True</IsWebBootstrapper>
+    <IsWebBootstrapper>False</IsWebBootstrapper>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <PublishUrl>..\publish\</PublishUrl>
-    <InstallUrl>https://nick-buhro.github.io/GL/click-once/</InstallUrl>
+    <InstallUrl />
     <TargetCulture>en</TargetCulture>
     <ApplicationVersion>0.1.0.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>false</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>0</UpdateInterval>
     <UpdateIntervalUnits>days</UpdateIntervalUnits>
-    <ProductName>Spreadsheet Ledger</ProductName>
-    <PublisherName>Nicholas Buhro</PublisherName>
+    <ProductName />
+    <PublisherName />
     <SupportUrl />
-    <FriendlyName>Spreadsheet Ledger for Excel</FriendlyName>
-    <OfficeApplicationDescription>Double-entry accounting in Excel.</OfficeApplicationDescription>
+    <FriendlyName />
+    <OfficeApplicationDescription />
     <LoadBehavior>3</LoadBehavior>
   </PropertyGroup>
   <ItemGroup>

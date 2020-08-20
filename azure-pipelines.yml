@@ -11,6 +11,7 @@ pool:
 
 variables:  
   Solution: 'SpreadsheetLedger.sln'
+  AddInProject: 'SpreadsheetLedger.ExcelAddIn\SpreadsheetLedger.ExcelAddIn.csproj'
   BuildPlatform: 'Any CPU'
   BuildConfiguration: 'Release'  
 
@@ -79,10 +80,18 @@ steps:
 - task: VSBuild@1
   displayName: 'Build click-once artifacts'
   inputs:
-    solution: '$(Solution)'
-    msbuildArgs: '/target:publish /p:ApplicationVersion="$(Build.BuildNumber)"'
+    solution: '$(AddInProject)'    
     platform: '$(BuildPlatform)'
     configuration: '$(buildConfiguration)'
+    msbuildArgs: >
+      /target:publish 
+      /p:ProductName="General Ledger"
+      /p:ApplicationVersion="$(Build.BuildNumber)"
+      /p:UpdateEnabled=true
+      /p:UpdateMode=Foreground
+      /p:InstallUrl=https://nick-buhro.github.io/GL/click-once/
+      /p:PublishUrl=https://nick-buhro.github.io/GL/click-once/
+      /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once/
 
 - publish: $(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish\
   displayName: 'Deploy click-once artifacts'
