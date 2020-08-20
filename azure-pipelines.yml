@@ -99,17 +99,20 @@ steps:
 - task: CopyFiles@2
   displayName: 'Add click-once artifacts to the staging'
   inputs:
-    contents: '$(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish\**'
+    sourceFolder: '$(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish'
+    contents: '**'
     targetFolder: '$(Build.StagingDirectory)\GL\docs\click-once'
 
-- script: |
-    git config user.email "n.buhro@gmail.com"
-    git config user.name "Nicholas Buhro by Azure Pipelines"
-    git add --all
-    git commit -m"Pipelines-Bot: publish VSTO Add-in version [$(Build.BuildNumber)]"
-  displayName: '[GIT] Commit new files'
+- task: CmdLine@2
+  displayName: '[GIT] Commit new files'  
   workingDirectory: '$(Build.StagingDirectory)\GL'
-
+  inputs:
+    script: |
+      git config user.email "n.buhro@gmail.com"
+      git config user.name "Nicholas Buhro by Azure Pipelines"
+      git add --all
+      git commit -m"Pipelines-Bot: publish VSTO Add-in version [$(Build.BuildNumber)]"
+ 
 - script: git push origin master;  
   displayName: '[GIT] Push changes to remote'
   workingDirectory: '$(Build.StagingDirectory)\GL'
