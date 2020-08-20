@@ -84,16 +84,17 @@ steps:
     platform: '$(BuildPlatform)'
     configuration: '$(buildConfiguration)'
     msbuildArgs: >
-      /target:publish 
+      /target:publish
       /p:ProductName="General Ledger"
       /p:ApplicationVersion="$(Build.BuildNumber)"
+      /p:OutputPath="$(Build.StagingDirectory)\publish"
       /p:UpdateEnabled=true
       /p:UpdateMode=Foreground
       /p:InstallUrl=https://nick-buhro.github.io/GL/click-once/
       /p:PublishUrl=https://nick-buhro.github.io/GL/click-once/
-      /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once/
+      /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once/      
 
-- publish: $(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish\
+- publish: $(Build.StagingDirectory)\publish
   displayName: 'Deploy click-once artifacts'
   artifact: publish
 
@@ -108,9 +109,9 @@ steps:
 - task: CopyFiles@2
   displayName: 'Add click-once artifacts to the staging'
   inputs:
-    sourceFolder: '$(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish'
-    contents: '**'
+    sourceFolder: '$(Build.StagingDirectory)\publish'
     targetFolder: '$(Build.StagingDirectory)\GL\docs\click-once'
+    contents: '**'    
 
 - task: CmdLine@2
   displayName: '[GIT] Commit new files'
