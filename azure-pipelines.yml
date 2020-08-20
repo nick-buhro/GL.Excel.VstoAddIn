@@ -104,9 +104,9 @@ steps:
     targetFolder: '$(Build.StagingDirectory)\GL\docs\click-once'
 
 - task: CmdLine@2
-  displayName: '[GIT] Commit new files'  
-  workingDirectory: '$(Build.StagingDirectory)\GL'
+  displayName: '[GIT] Commit new files'
   inputs:
+    workingDirectory: '$(Build.StagingDirectory)\GL'
     script: |
       git config user.email "n.buhro@gmail.com"
       git config user.name "Nicholas Buhro by Azure Pipelines"
