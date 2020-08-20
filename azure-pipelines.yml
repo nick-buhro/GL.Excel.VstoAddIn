@@ -94,20 +94,20 @@ steps:
 
 - script: git checkout master
   displayName: '[GIT] Checkout master branch'
-  workingDirectory: $(Build.StagingDirectory)
+  workingDirectory: '$(Build.StagingDirectory)\GL'
 
 - task: CopyFiles@2
   displayName: 'Add click-once artifacts to the staging'
   inputs:
     contents: '$(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish\**'
-    targetFolder: '$(Build.StagingDirectory)\docs\click-once'
+    targetFolder: '$(Build.StagingDirectory)\GL\docs\click-once'
 
 - script: |
     git add --all;
     git commit -m"Pipelines-Bot: publish VSTO Add-in version [$(Build.BuildNumber)]";
   displayName: '[GIT] Commit new files'
-  workingDirectory: $(Build.StagingDirectory)  
+  workingDirectory: '$(Build.StagingDirectory)\GL'
 
 - script: git push origin master;  
   displayName: '[GIT] Push changes to remote'
-  workingDirectory: $(Build.StagingDirectory)
+  workingDirectory: '$(Build.StagingDirectory)\GL'
