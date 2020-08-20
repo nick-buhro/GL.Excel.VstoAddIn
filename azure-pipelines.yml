@@ -1,0 +1,89 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:  
+  Solution: 'SpreadsheetLedger.sln'
+  BuildPlatform: 'Any CPU'
+  BuildConfiguration: 'Release'  
+
+name: '0.1.$(Rev:r)'
+
+steps:
+
+- task: DownloadSecureFile@1
+  name: cert
+  displayName: 'Download code signing certificate'
+  inputs:
+    secureFile: 'SpreadsheetLedger.ExcelAddIn_TemporaryKey.pfx'
+
+- task: PowerShell@2
+  displayName: 'Install code signing certificate'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "Start adding the PFX file to the certificate store."
+      $pfxpath = '$(cert.secureFilePath)'
+      $password = '$(PFXPassword)'
+      Add-Type -AssemblyName System.Security
+      $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
+      $cert.Import($pfxpath, $password, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]"PersistKeySet")
+      $store = new-object system.security.cryptography.X509Certificates.X509Store -argumentlist "MY", CurrentUser
+      $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
+      $store.Add($cert)
+      $store.Close()
+
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(Solution)'
+
+- task: VersionAssemblies@2
+  displayName: 'Patch assembly versions'
+  inputs:
+    Path: $(Build.SourcesDirectory)
+    VersionNumber: $(Build.BuildNumber)
+    InjectVersion: False
+    FilenamePattern: AssemblyInfo.*
+    OutputVersion: OutputedVersion
+
+- task: VSBuild@1
+  displayName: 'Build solution'
+  inputs:
+    solution: '$(Solution)'    
+    platform: '$(BuildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  displayName: 'Run tests'
+  inputs:
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
+    testSelector: 'testAssemblies' 
+    testAssemblyVer2: |
+      **\bin\$(BuildConfiguration)\**\*test*.dll
+      !**\obj\**
+      !**\xunit.runner.visualstudio.testadapter.dll
+      !**\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+    codeCoverageEnabled: True
+    runTestsInIsolation: True
+
+- task: VSBuild@1
+  displayName: 'Build click-once artifacts'
+  inputs:
+    solution: '$(Solution)'
+    msbuildArgs: '/target:publish /p:ApplicationVersion="$(Build.BuildNumber)"'
+    platform: '$(BuildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- publish: $(Build.SourcesDirectory)\SpreadsheetLedger.ExcelAddIn\bin\$(buildConfiguration)\app.publish\
+  displayName: 'Deploy click-once artifacts'
+  artifact: publish
