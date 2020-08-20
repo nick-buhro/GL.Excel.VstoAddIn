@@ -87,14 +87,14 @@ steps:
       /target:publish
       /p:ProductName="General Ledger"
       /p:ApplicationVersion="$(Build.BuildNumber)"
-      /p:OutputPath="$(Build.StagingDirectory)\publish"
+      /p:OutputPath="$(Build.StagingDirectory)\"
       /p:UpdateEnabled=true
       /p:UpdateMode=Foreground
       /p:InstallUrl=https://nick-buhro.github.io/GL/click-once/
       /p:PublishUrl=https://nick-buhro.github.io/GL/click-once/
       /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once/      
 
-- publish: $(Build.StagingDirectory)\publish
+- publish: $(Build.StagingDirectory)\app.publish
   displayName: 'Deploy click-once artifacts'
   artifact: publish
 
@@ -109,7 +109,7 @@ steps:
 - task: CopyFiles@2
   displayName: 'Add click-once artifacts to the staging'
   inputs:
-    sourceFolder: '$(Build.StagingDirectory)\publish'
+    sourceFolder: '$(Build.StagingDirectory)\app.publish'
     targetFolder: '$(Build.StagingDirectory)\GL\docs\click-once'
     contents: '**'    
 
