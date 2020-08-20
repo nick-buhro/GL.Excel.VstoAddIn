@@ -111,8 +111,8 @@ steps:
       git config user.email "n.buhro@gmail.com"
       git config user.name "Nicholas Buhro by Azure Pipelines"
       git add --all
-      git commit -m"Pipelines-Bot: publish VSTO Add-in version [$(Build.BuildNumber)]"
+      git commit -m"Pipelines-Bot: Add VSTO Add-in version [$(Build.BuildNumber)]"
  
-- script: git push origin master;  
+- script: git push origin master
   displayName: '[GIT] Push changes to remote'
   workingDirectory: '$(Build.StagingDirectory)\GL'
