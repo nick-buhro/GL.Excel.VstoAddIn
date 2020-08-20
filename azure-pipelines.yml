@@ -87,12 +87,12 @@ steps:
       /target:publish
       /p:ProductName="General Ledger"
       /p:ApplicationVersion="$(Build.BuildNumber)"
-      /p:OutputPath="$(Build.StagingDirectory)\"
+      /p:OutputPath=$(Build.StagingDirectory)\
       /p:UpdateEnabled=true
       /p:UpdateMode=Foreground
-      /p:InstallUrl=https://nick-buhro.github.io/GL/click-once/
-      /p:PublishUrl=https://nick-buhro.github.io/GL/click-once/
-      /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once/      
+      /p:InstallUrl=https://nick-buhro.github.io/GL/click-once
+      /p:PublishUrl=https://nick-buhro.github.io/GL/click-once
+      /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once
 
 - publish: $(Build.StagingDirectory)\app.publish
   displayName: 'Deploy click-once artifacts'
