@@ -113,6 +113,6 @@ steps:
       git add --all
       git commit -m"Pipelines-Bot: Add VSTO Add-in version [$(Build.BuildNumber)]"
  
-- script: git push origin master
+- script: git push https://$(GitHubPAT)@github.com/nick-buhro/GL.git  master
   displayName: '[GIT] Push changes to remote'
   workingDirectory: '$(Build.StagingDirectory)\GL'
