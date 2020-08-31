@@ -11,7 +11,7 @@ variables:
   BuildPlatform: 'Any CPU'
   BuildConfiguration: 'Release'
 
-name: '0.1.$(Rev:r)'
+name: '0.2.$(Rev:r)'
 
 steps:
 

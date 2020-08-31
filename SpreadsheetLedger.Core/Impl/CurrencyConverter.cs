@@ -31,14 +31,11 @@ namespace SpreadsheetLedger.Core.Impl
         }
                 
         public decimal Convert(decimal amount, string symbol, DateTime date, string currency)
-        {
-            if (currency != null)
-                throw new NotImplementedException("Convertation to specific currency is not implemented yet.");
-
+        {            
             if (!_currencyRules.TryGetValue(symbol, out var rules))
                 throw new LedgerException($"Can't find currency convertation rules for '{symbol}'.");
 
-            var rules2 = new (char op, string source)[0];
+            var rules2 = new (char op, string source)[0];               
             if (!string.IsNullOrEmpty(currency) && !_currencyRules.TryGetValue(currency, out rules2))
                 throw new LedgerException($"Can't find currency convertation rules for '{currency}'.");
 

@@ -214,11 +214,63 @@ namespace SpreadsheetLedger.Core.Impl
             }
         }
 
+
         private void AddGLTransaction(
             DateTime date, string r, string num, string text, decimal? amount, string comm, decimal amountdc,
             AccountRecord account, AccountRecord offset,
             string tag, string project, string docText)
         {
+            if (amount.HasValue && amount.Value != 0)
+            {
+                if (!IsValidCurrency(account, comm))
+                {
+                    var accCommodity = GetSingleCommodity(account);
+                    var accAmount = _converter.Convert(amount.Value, comm, date, accCommodity);
+
+                    if (string.IsNullOrEmpty(account.SettlementAccountId))
+                        throw new LedgerException($"Account '{account.AccountId}' doesn't accept '{comm}'. '{nameof(account.SettlementAccountId)}' is not configured.");
+
+                    if (!_coa.TryGetValue(account.SettlementAccountId, out AccountRecord settlementAccount))
+                        throw new LedgerException($"Settlement account '{account.SettlementAccountId}' not found.");
+                    
+                    if (!IsValidCurrency(settlementAccount, comm))
+                        throw new LedgerException($"Settlement account '{settlementAccount.AccountId}' doesn't accept '{comm}'.");
+
+                    if (!IsValidCurrency(settlementAccount, accCommodity))
+                        throw new LedgerException($"Settlement account '{settlementAccount.AccountId}' doesn't accept '{accCommodity}'.");
+
+
+                    AddGLTransaction(date, r, num, text, accAmount, accCommodity, amountdc, account, settlementAccount, tag, project, docText);
+                    AddGLTransaction(date, r, num, text, amount, comm, amountdc, settlementAccount, offset, tag, project, docText);
+
+                    return;
+                }
+
+                if (!IsValidCurrency(offset, comm))
+                {
+                    var accCommodity = GetSingleCommodity(offset);
+                    var accAmount = _converter.Convert(amount.Value, comm, date, accCommodity);
+
+                    if (string.IsNullOrEmpty(offset.SettlementAccountId))
+                        throw new LedgerException($"Account '{offset.AccountId}' doesn't accept '{comm}'. '{nameof(offset.SettlementAccountId)}' is not configured.");
+
+                    if (!_coa.TryGetValue(offset.SettlementAccountId, out AccountRecord settlementAccount))
+                        throw new LedgerException($"Settlement account '{offset.SettlementAccountId}' not found.");
+
+                    if (!IsValidCurrency(settlementAccount, comm))
+                        throw new LedgerException($"Settlement account '{settlementAccount.AccountId}' doesn't accept '{comm}'.");
+
+                    if (!IsValidCurrency(settlementAccount, accCommodity))
+                        throw new LedgerException($"Settlement account '{settlementAccount.AccountId}' doesn't accept '{accCommodity}'.");
+
+
+                    AddGLTransaction(date, r, num, text, amount, comm, amountdc, account, settlementAccount, tag, project, docText);
+                    AddGLTransaction(date, r, num, text, accAmount, accCommodity, amountdc, settlementAccount, offset, tag, project, docText);                    
+
+                    return;
+                }
+            }
+
             UpdateBalanceTable(account.AccountId, comm, amount ?? 0, amountdc);
             UpdateBalanceTable(offset.AccountId, comm, -amount ?? 0, -amountdc);
 
@@ -301,6 +353,24 @@ namespace SpreadsheetLedger.Core.Impl
                 default:
                     throw new Exception($"Account '{account.AccountId}' has unsupported type: '{account.Type}'. Supported: 'A' (Assets), 'L' (Liabilities) and 'E' (Equity).");
             }
+        }
+
+        private static bool IsValidCurrency(AccountRecord account, string comm)
+        {
+            if (string.IsNullOrWhiteSpace(account.Commodity))
+                return true;
+            return $",{account.Commodity},".Replace(" ", "").Contains(comm.Trim());
+        }
+
+        private static string GetSingleCommodity(AccountRecord account)
+        {
+            if (string.IsNullOrWhiteSpace(account.Commodity))
+                throw new LedgerException($"Invalid operation.");
+
+            if (account.Commodity.Contains(","))
+                throw new LedgerException($"Account settlement require single commodity: '{account.AccountId}'.");
+
+            return account.Commodity.Trim();            
         }
     }
 }
