@@ -9,9 +9,10 @@ variables:
   Solution: 'SpreadsheetLedger.sln'
   AddInProject: 'SpreadsheetLedger.ExcelAddIn\SpreadsheetLedger.ExcelAddIn.csproj'
   BuildPlatform: 'Any CPU'
-  BuildConfiguration: 'Release'  
+  BuildConfiguration: 'Release'
+  Version: '0.1'
 
-name: '0.1.0.$(Rev:r)'
+name: "$(Version).$[counter(variables['Version'], 0)].$(Rev:r)"
 
 steps:
 
@@ -95,31 +96,36 @@ steps:
       /p:ProductName="General Ledger"
       /p:ApplicationVersion="$(Build.BuildNumber)"
       /p:OutputPath=$(Build.StagingDirectory)\
-      /p:UpdateEnabled=true
-      /p:UpdateMode=Foreground
-      /p:InstallUrl=https://nick-buhro.github.io/GL/click-once      
-      /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once
-      /p:IsWebBootstrapper=true
-      /p:BootstrapperEnabled=true
-      /p:CreateWebPageOnPublish=true
-      /p:WebPage=index.html
+
+#      /p:UpdateEnabled=true
+#      /p:UpdateMode=Foreground
+#      /p:IsWebBootstrapper=true
+#      /p:BootstrapperEnabled=true
+#      /p:CreateWebPageOnPublish=true
+#      /p:WebPage=index.html
+#      /p:InstallUrl=https://nick-buhro.github.io/GL/click-once      
+#      /p:UpdateUrl=https://nick-buhro.github.io/GL/click-once
+
 
 - publish: $(Build.StagingDirectory)\app.publish
   displayName: 'Publish artifacts to Pipelines'
   artifact: publish
 
-- task: CmdLine@2
-  displayName: 'Publish artifacts to GitHub Pages'
-  inputs:
-    workingDirectory: '$(Build.StagingDirectory)'
-    script: |
-      git clone https://github.com/nick-buhro/GL.git
-      cd GL
-      git checkout master
-      if not exist $(Build.StagingDirectory)\GL\docs\click-once\ mkdir $(Build.StagingDirectory)\GL\docs\click-once
-      xcopy /s /y $(Build.StagingDirectory)\app.publish\ $(Build.StagingDirectory)\GL\docs\click-once\
-      git config user.email "n.buhro@gmail.com"
-      git config user.name "Nicholas Buhro by Azure Pipelines"
-      git add --all
-      git commit -m"Pipelines-Bot: Add VSTO Add-in version [$(Build.BuildNumber)]"
-      git push https://$(GitHubPAT)@github.com/nick-buhro/GL.git  master
+### Click-once auto-update doesn't work with self-signed certificate ;(
+#
+#- task: CmdLine@2
+#  displayName: 'Publish artifacts to GitHub Pages'
+#  inputs:
+#    workingDirectory: '$(Build.StagingDirectory)'
+#    script: |
+#      git clone https://github.com/nick-buhro/GL.git
+#      cd GL
+#      git checkout master
+#      if not exist $(Build.StagingDirectory)\GL\docs\click-once\ mkdir $(Build.StagingDirectory)\GL\docs\click-once
+#      xcopy /s /y $(Build.StagingDirectory)\app.publish\ $(Build.StagingDirectory)\GL\docs\click-once\
+#      git config user.email "n.buhro@gmail.com"
+#      git config user.name "Nicholas Buhro by Azure Pipelines"
+#      git add --all
+#      git commit -m"Pipelines-Bot: Add VSTO Add-in version [$(Build.BuildNumber)]"
+#      git push https://$(GitHubPAT)@github.com/nick-buhro/GL.git  master
+#
