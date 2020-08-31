@@ -10,9 +10,8 @@ variables:
   AddInProject: 'SpreadsheetLedger.ExcelAddIn\SpreadsheetLedger.ExcelAddIn.csproj'
   BuildPlatform: 'Any CPU'
   BuildConfiguration: 'Release'
-  Version: '0.1'
 
-name: "$(Version).$[counter(variables['Version'], 0)].$(Rev:r)"
+name: '0.1.$(Rev:r)'
 
 steps:
 
@@ -53,7 +52,7 @@ steps:
   displayName: 'Patch assembly versions'
   inputs:
     Path: $(Build.SourcesDirectory)
-    VersionNumber: $(Build.BuildNumber)
+    VersionNumber: '$(Build.BuildNumber).0'
     InjectVersion: False
     FilenamePattern: AssemblyInfo.*
     OutputVersion: OutputedVersion
