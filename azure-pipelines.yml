@@ -93,7 +93,7 @@ steps:
     msbuildArgs: >
       /target:publish
       /p:ProductName="General Ledger"
-      /p:ApplicationVersion="$(Build.BuildNumber)"
+      /p:ApplicationVersion="$(Build.BuildNumber).0"
       /p:OutputPath=$(Build.StagingDirectory)\
 
 #      /p:UpdateEnabled=true
