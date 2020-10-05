@@ -125,26 +125,20 @@ namespace SpreadsheetLedger.Core.Impl
                     if (!_coa.TryGetValue(j.OffsetAccountId, out AccountRecord offsetAccount))
                         throw new LedgerException($"Offset account '{j.OffsetAccountId}' not found.");
 
-                    // Find project
+                    // Validate tag
+                                        
+                    if (!string.IsNullOrEmpty(account.Tag) && (account.Tag != j.Tag))
+                        throw new LedgerException($"'{account.AccountId}' account tag ({account.Tag}) doesn't match to journal record tag ({j.Tag}).");
 
-                    string project = null;
-                    if (!string.IsNullOrEmpty(account.Project))
-                    {
-                        project = account.Project;
-                        if (!string.IsNullOrEmpty(offsetAccount.Project) && project != offsetAccount.Project)
-                            throw new LedgerException($"'{j.AccountId} account project doesn't equal to '{j.OffsetAccountId}' offset account project.");
-                    }
-                    else if (!string.IsNullOrEmpty(offsetAccount.Project))
-                    {
-                        project = offsetAccount.Project;
-                    }
+                    if (!string.IsNullOrEmpty(offsetAccount.Tag) && (offsetAccount.Tag != j.Tag))
+                        throw new LedgerException($"'{offsetAccount.AccountId}' offset account tag ({offsetAccount.Tag}) doesn't match to journal record tag ({j.Tag}).");
 
                     // Add GL record
 
                     AddGLTransaction(
                         dt, j.R, j.Num, j.Text, amount, j.Commodity, amountbc,
                         account, offsetAccount,
-                        j.Tag, project, j.DocText);
+                        j.Tag, j.DocText);
                 }
                 catch (Exception ex)
                 {
@@ -189,23 +183,16 @@ namespace SpreadsheetLedger.Core.Impl
                     if (!IsEquityAccount(revaluationAccount))
                         throw new LedgerException($"Revaluation account '{account.RevaluationAccountId}' for '{account.AccountId}' is not of type 'E' (Equity).");
 
-                    // Validate project
+                    // Validate tag
 
-                    string project = null;
-                    if (!string.IsNullOrEmpty(account.Project))
-                    {
-                        project = account.Project;
-                        if (!string.IsNullOrEmpty(revaluationAccount.Project) && revaluationAccount.Project != project)
-                            throw new Exception($"'{account.AccountId} account project doesn't equal to '{revaluationAccount.AccountId}' revaluation account project.");
-                    }
-                    else if (!string.IsNullOrEmpty(revaluationAccount.Project))
-                    {
-                        project = revaluationAccount.Project;
-                    }
+                    if (!string.IsNullOrEmpty(account.Tag) && !string.IsNullOrEmpty(revaluationAccount.Tag) && (account.Tag != revaluationAccount.Tag))
+                        throw new LedgerException($"'{account.AccountId}' account tag ({account.Tag}) doesn't match to '{revaluationAccount.AccountId}' revaluation account tag ({revaluationAccount.Tag}).");
 
+                    var tag = account.Tag ?? revaluationAccount.Tag;
+                    
                     // Add GL record
 
-                    AddGLTransaction(dt, "r", null, text, null, key.comm, correction, account, revaluationAccount, null, project, null);
+                    AddGLTransaction(dt, "r", null, text, null, key.comm, correction, account, revaluationAccount, tag, null);
                 }
                 catch (Exception ex)
                 {
@@ -218,7 +205,7 @@ namespace SpreadsheetLedger.Core.Impl
         private void AddGLTransaction(
             DateTime date, string r, string num, string text, decimal? amount, string comm, decimal amountdc,
             AccountRecord account, AccountRecord offset,
-            string tag, string project, string docText)
+            string tag, string docText)
         {
             if (amount.HasValue && amount.Value != 0)
             {
@@ -240,8 +227,8 @@ namespace SpreadsheetLedger.Core.Impl
                         throw new LedgerException($"Settlement account '{settlementAccount.AccountId}' doesn't accept '{accCommodity}'.");
 
 
-                    AddGLTransaction(date, r, num, text, accAmount, accCommodity, amountdc, account, settlementAccount, tag, project, docText);
-                    AddGLTransaction(date, r, num, text, amount, comm, amountdc, settlementAccount, offset, tag, project, docText);
+                    AddGLTransaction(date, r, num, text, accAmount, accCommodity, amountdc, account, settlementAccount, tag, docText);
+                    AddGLTransaction(date, r, num, text, amount, comm, amountdc, settlementAccount, offset, tag, docText);
 
                     return;
                 }
@@ -264,8 +251,8 @@ namespace SpreadsheetLedger.Core.Impl
                         throw new LedgerException($"Settlement account '{settlementAccount.AccountId}' doesn't accept '{accCommodity}'.");
 
 
-                    AddGLTransaction(date, r, num, text, amount, comm, amountdc, account, settlementAccount, tag, project, docText);
-                    AddGLTransaction(date, r, num, text, accAmount, accCommodity, amountdc, settlementAccount, offset, tag, project, docText);                    
+                    AddGLTransaction(date, r, num, text, amount, comm, amountdc, account, settlementAccount, tag, docText);
+                    AddGLTransaction(date, r, num, text, accAmount, accCommodity, amountdc, settlementAccount, offset, tag, docText);
 
                     return;
                 }
@@ -293,7 +280,6 @@ namespace SpreadsheetLedger.Core.Impl
                 OffsetAccountId = offset.AccountId,
                 OffsetAccountName = offset.Name,
                 Tag = tag,
-                Project = project,
                 DocText = docText
             });
 
@@ -315,8 +301,7 @@ namespace SpreadsheetLedger.Core.Impl
                 AccountType = offset.Type,
                 OffsetAccountId = account.AccountId,
                 OffsetAccountName = account.Name,
-                Tag = tag,
-                Project = project,
+                Tag = tag,                
                 DocText = docText
             });
         }

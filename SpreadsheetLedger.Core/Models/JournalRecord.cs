@@ -29,8 +29,7 @@ namespace SpreadsheetLedger.Core.Models
 
         [Name("Offset Account Id")]
         public string OffsetAccountId { get; private set; }
-
-        [Name("Tag")]
+                
         public string Tag { get; private set; }
 
 

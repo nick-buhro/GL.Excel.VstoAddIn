@@ -52,7 +52,5 @@ namespace SpreadsheetLedger.Core.Models
         public string OffsetAccountName { get; set; }
 
         public string Tag { get; set; }
-
-        public string Project { get; set; }
     }
 }
